@@ -58,6 +58,7 @@ Para resolver essa situação, criei este sistema que **automatiza todo o proces
 | Tela para inserir data de abertura | ⏳ Em desenvolvimento |
 | Tela para informar referência do cliente | ⏳ Em desenvolvimento |
 | Banco de dados para histórico de referências | ⏳ Em desenvolvimento |
+| Consulta e reajuste de referência | ⏳ Em desenvolvimento |
 
 ## 🤖 Observação
 A Inteligência Artificial foi utilizada **apenas para revisar explicações e textos**, evitando gerar ou alterar o código.  
