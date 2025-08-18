@@ -60,7 +60,7 @@ Para resolver essa situação, criei este sistema que **automatiza todo o proces
 | Banco de dados para histórico de referências | ⏳ Em desenvolvimento |
 
 ## 🤖 Observação
-A Inteligência Artificial foi utilizada **apenas para revisar explicações e textos**, nunca para gerar ou alterar o código.  
+A Inteligência Artificial foi utilizada **apenas para revisar explicações e textos**, evitando gerar ou alterar o código.  
 
 ## 📜 Licença
 Este projeto foi desenvolvido para fins de estudo e uso interno.  
