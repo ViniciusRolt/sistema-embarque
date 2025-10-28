@@ -1,6 +1,5 @@
 import datetime
 
-# Dicionário para armazenar os embarques.
 embarques = {}
 contador = 0
 ano = "25"
@@ -138,8 +137,6 @@ def gerenciar_embarque():
     else:
         print("Opção inválida.")
 
-
-# --- Lógica Principal ---
 while True:
     print("\n===============================================================")
     print("==================== Sistema de Embarques =====================")
