@@ -83,13 +83,13 @@ def exibir_embarques():
     
     embarques_ordenados = sorted(embarques.items(), key=lambda item: item[1]["data_registro"])
     
-    print(f"{"Referência":<15} | {"Data de Registro":<18} | {"Cliente":<15} | {"Tipo":<10} | {"Ref. Cliente":<15}")
+    print(f"{'Referência':<15} | {'Data de Registro':<18} | {'Cliente':<15} | {'Tipo':<10} | {'Ref. Cliente':<15}")
     print("-" * 85)
-    
+
     for ref, dados in embarques_ordenados:
         data_formatada = datetime.datetime.strptime(dados["data_registro"], "%Y-%m-%d").strftime("%d/%m/%Y")
         tipo_abreviado = dados["tipo"][0] + dados["transporte"][0]
-        print(f"{ref:<15} | {data_formatada:<18} | {dados["cliente"]:<15} | {tipo_abreviado:<10} | {dados["ref_cliente"]:<15}")
+        print(f"{ref:<15} | {data_formatada:<18} | {dados['cliente']:<15} | {tipo_abreviado:<10} | {dados['ref_cliente']:<15}")
         
     print("===============================================================\n")
 
@@ -108,7 +108,7 @@ def gerenciar_embarque():
         return
 
     dados = embarques[ref_alvo]
-    print(f"\nEmbarque selecionado: {ref_alvo} - Cliente: {dados["cliente"]}")
+    print(f"\nEmbarque selecionado: {ref_alvo} - Cliente: {dados['cliente']}")
     print("O que deseja fazer?")
     print("1 - Editar Referência do Cliente")
     print("2 - Excluir Embarque")
@@ -117,7 +117,7 @@ def gerenciar_embarque():
     opcao = input("Digite o número da opção: ")
 
     if opcao == "1":
-        nova_ref_cliente = input(f"Nova Referência do Cliente (atual: {dados["ref_cliente"]}, ou 0 para N/A): ")
+        nova_ref_cliente = input(f"Nova Referência do Cliente (atual: {dados['ref_cliente']}, ou 0 para N/A): ")
         if nova_ref_cliente == "0":
             nova_ref_cliente = "N/A"
         
