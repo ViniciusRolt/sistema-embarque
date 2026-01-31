@@ -1,258 +1,211 @@
 import datetime
 
-embarques = {}
-contador = 0
-ano = "25"
+class Embarque:
+    def __init__(self, referencia, tipo_operacao, cliente_nome, transporte, data_registro, ref_cliente):
+        self.referencia = referencia
+        self.tipo_operacao = tipo_operacao
+        self.cliente_nome = cliente_nome
+        self.transporte = transporte
+        self.data_registro = data_registro
+        self.ref_cliente = ref_cliente
 
-clientes = {
-    "1": "Signode",
-    "2": "Starrett",
-    "3": "Interbrilho",
-    "4": "Radio Holland"
-}
+    def __str__(self):
+        return f"{self.referencia} | {self.cliente_nome} ({self.transporte})"
 
-def gerar_referencia(tipo_operacao, tipo_transporte, contador_atual):
-    """Gera a referência única do embarque."""
-    global contador
-    contador = contador_atual + 1
+class SistemaGerenciador:
+    def __init__(self):
+        self.embarques = {}
+        self.contador = 0
+        self.ano_atual = "25"
+        self.clientes = {
+            "1": "Signode",
+            "2": "Starrett",
+            "3": "Interbrilho",
+            "4": "Radio Holland"
+        }
     
-    prefixos = {
-        ("Importação", "Aéreo"): "IA",
-        ("Importação", "Marítimo"): "IM",
-        ("Exportação", "Aéreo"): "EA",
-        ("Exportação", "Marítimo"): "EM",
-        ("Exportação", "Rodoviário"): "ER",
-    }
-    
-    prefixo = prefixos.get((tipo_operacao, tipo_transporte))
-    if not prefixo:
-        raise ValueError("Combinação de operação e transporte inválida.")
+    def get_cliente_nome(self, id_cliente):
+        return self.clientes.get(id_cliente)
+
+    def listar_clientes(self):
+        return self.clientes.items()
+
+    def gerar_referencia(self, tipo_operacao, tipo_transporte):
+        prefixos = {
+            ("Importação", "Aéreo"): "IA",
+            ("Importação", "Marítimo"): "IM",
+            ("Exportação", "Aéreo"): "EA",
+            ("Exportação", "Marítimo"): "EM",
+            ("Exportação", "Rodoviário"): "ER",
+        }
         
-    return f"{prefixo}-{contador:04d}/{ano}", contador
+        prefixo = prefixos.get((tipo_operacao, tipo_transporte))
+        if not prefixo:
+            raise ValueError("Combinação de operação e transporte inválida.")
+        
+        self.contador += 1
+        return f"{prefixo}-{self.contador:04d}/{self.ano_atual}"
 
-def registrar_embarque(tipo_operacao, cliente_id, transporte_nome):
-    """Função para registrar um novo embarque com as novas informações."""
-    global contador
-    global embarques
+    def criar_embarque(self, tipo_operacao, cliente_nome, transporte, data_registro, ref_cliente):
+        ref = self.gerar_referencia(tipo_operacao, transporte)
+        
+        novo_embarque = Embarque(
+            referencia=ref,
+            tipo_operacao=tipo_operacao,
+            cliente_nome=cliente_nome,
+            transporte=transporte,
+            data_registro=data_registro,
+            ref_cliente=ref_cliente
+        )
+        
+        self.embarques[ref] = novo_embarque
+        return novo_embarque
 
-    cliente_nome = clientes[cliente_id]
-    
-    while True:
-        data_str = input("Informe a data de registro (DD/MM/AAAA): ")
+    def buscar_embarque(self, referencia):
+        return self.embarques.get(referencia)
+
+    def obter_todos_embarques(self):
+        lista = list(self.embarques.values())
+        lista.sort(key=lambda x: x.data_registro)
+        return lista
+
+    def editar_ref_cliente(self, referencia, nova_ref):
+        if referencia in self.embarques:
+            self.embarques[referencia].ref_cliente = nova_ref
+            return True
+        return False
+
+    def excluir_embarque(self, referencia):
+        if referencia in self.embarques:
+            del self.embarques[referencia]
+            return True
+        return False
+
+class InterfaceConsole:
+    """Gerencia a interação com o usuário (Inputs e Prints)."""
+    def __init__(self):
+        self.sistema = SistemaGerenciador()
+
+    def _ler_data(self):
+        while True:
+            data_str = input("Informe a data de registro (DD/MM/AAAA): ")
+            try:
+                return datetime.datetime.strptime(data_str, "%d/%m/%Y").strftime("%Y-%m-%d")
+            except ValueError:
+                print("⚠️ Formato inválido. Use DD/MM/AAAA.")
+
+    def _selecionar_cliente(self):
+        while True:
+            print("\n--- Seleção de Cliente ---")
+            for k, v in self.sistema.listar_clientes():
+                print(f"{k} - {v}")
+            print("0 - Voltar")
+            
+            escolha = input("Digite o número do cliente: ")
+            if escolha == "0": return None
+            
+            nome = self.sistema.get_cliente_nome(escolha)
+            if nome: return nome
+            print("⚠️ Cliente inválido.")
+
+    def _selecionar_transporte(self, tipo_operacao):
+        opcoes = {
+            "1": "Aéreo",
+            "2": "Marítimo"
+        }
+        if tipo_operacao == "Exportação":
+            opcoes["3"] = "Rodoviário"
+
+        while True:
+            print(f"\n--- Transporte ({tipo_operacao}) ---")
+            for k, v in opcoes.items():
+                print(f"{k} - {v}")
+            print("0 - Voltar")
+            
+            escolha = input("Opção: ")
+            if escolha == "0": return None
+            if escolha in opcoes: return opcoes[escolha]
+            print("⚠️ Opção inválida.")
+
+    def menu_novo_registro(self, tipo_operacao):
+        cliente = self._selecionar_cliente()
+        if not cliente: return
+
+        transporte = self._selecionar_transporte(tipo_operacao)
+        if not transporte: return
+
+        data = self._ler_data()
+        ref_cliente = input("Informe a referência do cliente (ou 0 para N/A): ")
+        if ref_cliente == "0": ref_cliente = "N/A"
+
         try:
-            data_registro = datetime.datetime.strptime(data_str, "%d/%m/%Y").strftime("%Y-%m-%d")
-            break
-        except ValueError:
-            print("Formato de data inválido. Use DD/MM/AAAA.")
+            emb = self.sistema.criar_embarque(tipo_operacao, cliente, transporte, data, ref_cliente)
+            print(f"\n Embarque Registrado com Sucesso: {emb.referencia}")
+        except ValueError as e:
+            print(f"Erro: {e}")
 
-    ref_cliente = input("Informe a referência do cliente (ou 0 se não houver): ")
-    if ref_cliente == "0":
-        ref_cliente = "N/A"
-    
-    try:
-        ref, contador = gerar_referencia(tipo_operacao, transporte_nome, contador)
-    except ValueError as e:
-        print(f"Erro ao gerar referência: {e}")
-        return
+    def menu_exibir(self):
+        embarques = self.sistema.obter_todos_embarques()
+        if not embarques:
+            print("\n Nenhum embarque registrado.")
+            return
 
-    embarques[ref] = {
-        "tipo": tipo_operacao,
-        "cliente": cliente_nome,
-        "transporte": transporte_nome,
-        "data_registro": data_registro,
-        "ref_cliente": ref_cliente
-    }
-    
-    print(f"\n--- Embarque Registrado ---")
-    print(f"Referência Gerada: {ref}")
-    print(f"Cliente: {cliente_nome}")
-    print(f"Tipo: {tipo_operacao} ({transporte_nome})")
-    print(f"Data de Registro: {data_str}")
-    print(f"Referência do Cliente: {ref_cliente}")
-    print("---------------------------\n")
-
-def exibir_embarques():
-    """Exibe todas as referências abertas (registradas) e quando foram abertas."""
-    if not embarques:
-        print("\nNenhum embarque registrado ainda.")
-        return
-
-    print("\n===============================================================")
-    print("===================== Embarques Registrados ===================")
-    print("===============================================================")
-    
-    embarques_ordenados = sorted(embarques.items(), key=lambda item: item[1]["data_registro"])
-    
-    print(f"{'Referência':<15} | {'Data de Registro':<18} | {'Cliente':<15} | {'Tipo':<10} | {'Ref. Cliente':<15}")
-    print("-" * 85)
-
-    for ref, dados in embarques_ordenados:
-        data_formatada = datetime.datetime.strptime(dados["data_registro"], "%Y-%m-%d").strftime("%d/%m/%Y")
-        tipo_abreviado = dados["tipo"][0] + dados["transporte"][0]
-        print(f"{ref:<15} | {data_formatada:<18} | {dados['cliente']:<15} | {tipo_abreviado:<10} | {dados['ref_cliente']:<15}")
+        print("\n" + "="*85)
+        print(f"{'Referência':<15} | {'Data':<12} | {'Cliente':<15} | {'Tipo':<10} | {'Ref. Cli':<15}")
+        print("-" * 85)
         
-    print("===============================================================\n")
+        for e in embarques:
+            data_fmt = datetime.datetime.strptime(e.data_registro, "%Y-%m-%d").strftime("%d/%m/%Y")
+            tipo_abrev = e.tipo_operacao[0] + e.transporte[0]
+            print(f"{e.referencia:<15} | {data_fmt:<12} | {e.cliente_nome:<15} | {tipo_abrev:<10} | {e.ref_cliente:<15}")
+        print("="*85 + "\n")
 
-def gerenciar_embarque():
-    """Permite editar ou excluir um embarque existente."""
-    exibir_embarques()
-    if not embarques:
-        return
+    def menu_gerenciar(self):
+        self.menu_exibir()
+        ref = input("Digite a Referência para gerenciar (ou 0 para sair): ").upper()
+        if ref == "0": return
 
-    ref_alvo = input("Digite a Referência do embarque para gerenciar (ou 0 para voltar): ").upper()
-    if ref_alvo == "0":
-        return
+        emb = self.sistema.buscar_embarque(ref)
+        if not emb:
+            print("❌ Referência não encontrada.")
+            return
 
-    if ref_alvo not in embarques:
-        print(f"Referência \'{ref_alvo}\' não encontrada.")
-        return
+        print(f"\nSelecionado: {emb}")
+        print("1 - Editar Ref. Cliente\n2 - Excluir\n0 - Cancelar")
+        op = input("Opção: ")
 
-    dados = embarques[ref_alvo]
-    print(f"\nEmbarque selecionado: {ref_alvo} - Cliente: {dados['cliente']}")
-    print("O que deseja fazer?")
-    print("1 - Editar Referência do Cliente")
-    print("2 - Excluir Embarque")
-    print("0 - Voltar")
+        if op == "1":
+            nova = input("Nova Referência do Cliente: ")
+            self.sistema.editar_ref_cliente(ref, nova)
+            print("✅ Atualizado.")
+        elif op == "2":
+            conf = input(f"Tem certeza que deseja excluir {ref}? (S/N): ").upper()
+            if conf == "S":
+                self.sistema.excluir_embarque(ref)
+                print("🗑️ Embarque excluído.")
 
-    opcao = input("Digite o número da opção: ")
-
-    if opcao == "1":
-        nova_ref_cliente = input(f"Nova Referência do Cliente (atual: {dados['ref_cliente']}, ou 0 para N/A): ")
-        if nova_ref_cliente == "0":
-            nova_ref_cliente = "N/A"
-        
-        embarques[ref_alvo]["ref_cliente"] = nova_ref_cliente
-        print(f"Referência do Cliente para {ref_alvo} atualizada para: {nova_ref_cliente}")
-
-    elif opcao == "2":
-        confirmacao = input(f"Tem certeza que deseja EXCLUIR o embarque {ref_alvo}? (S/N): ").upper()
-        if confirmacao == "S":
-            del embarques[ref_alvo]
-            print(f"Embarque {ref_alvo} excluído com sucesso.")
-        else:
-            print("Exclusão cancelada.")
-    
-    elif opcao == "0":
-        return
-    else:
-        print("Opção inválida.")
-
-while True:
-    print("\n===============================================================")
-    print("==================== Sistema de Embarques =====================")
-    print("===============================================================")
-    print("Escolha uma das opções abaixo:")
-    print("1 - Novo Registro (Importação)")
-    print("2 - Novo Registro (Exportação)")
-    print("3 - Exibir Referências Abertas")
-    print("4 - Gerenciar Embarque (Editar/Excluir)")
-    print("0 - Sair")
-
-    opcao = input("Digite o número da opção: ")
-    print("===============================================================")
-
-    if opcao == "1":
-        tipo_operacao = "Importação"
+    def executar(self):
         while True:
-            print("Escolha o cliente: ")
-            for k, v in clientes.items():
-                print(f"{k} - {v}")
-            print("0 - Voltar")
-
-            cliente = input("Digite o número do cliente: ")
-            print("===============================================================")
-
-            if cliente == "0":
-                break
-
-            if cliente not in clientes:
-                print("Cliente inválido. Tente novamente.")
-                continue
-
-            print(f"{tipo_operacao} para {clientes[cliente]} selecionada.")
-
-            while True:
-                print("Informe o tipo de transporte:")
-                print("1 - Aéreo")
-                print("2 - Marítimo")
-                print("0 - Voltar")
-                modelo = input("Digite o número do modelo: ")
-                print("===============================================================")
-
-                if modelo == "0":
-                    break
-                
-                if modelo == "1":
-                    transporte_nome = "Aéreo"
-                elif modelo == "2":
-                    transporte_nome = "Marítimo"
-                else:
-                    print("Opção inválida. Tente novamente.")
-                    continue
-                
-                registrar_embarque(tipo_operacao, cliente, transporte_nome)
-                break
+            print("\n=== 🚢 SISTEMA DE EMBARQUES (POO) ===")
+            print("1 - Nova Importação")
+            print("2 - Nova Exportação")
+            print("3 - Exibir Tudo")
+            print("4 - Gerenciar (Editar/Excluir)")
+            print("0 - Sair")
             
-            break
-
-    elif opcao == "2":
-        tipo_operacao = "Exportação"
-        while True:
-            print("Escolha o cliente: ")
-            for k, v in clientes.items():
-                print(f"{k} - {v}")
-            print("0 - Voltar")
-
-            cliente = input("Digite o número do cliente: ")
-            print("===============================================================")
-
-            if cliente == "0":
-                break
-
-            if cliente not in clientes:
-                print("Cliente inválido. Tente novamente.")
-                continue
-
-            print(f"{tipo_operacao} para {clientes[cliente]} selecionada.")
-
-            while True:
-                print("Informe o tipo de transporte:")
-                print("1 - Aéreo")
-                print("2 - Marítimo")
-                print("3 - Rodoviário")
-                print("0 - Voltar")
-                modelo = input("Digite o número do modelo: ")
-                print("===============================================================")
-
-                if modelo == "0":
-                    break
-                
-                if modelo == "1":
-                    transporte_nome = "Aéreo"
-                elif modelo == "2":
-                    transporte_nome = "Marítimo"
-                elif modelo == "3":
-                    transporte_nome = "Rodoviário"
-                else:
-                    print("Opção inválida. Tente novamente.")
-                    continue
-                
-                registrar_embarque(tipo_operacao, cliente, transporte_nome)
-                break
+            opcao = input("Opção: ")
             
-            break
+            if opcao == "1": self.menu_novo_registro("Importação")
+            elif opcao == "2": self.menu_novo_registro("Exportação")
+            elif opcao == "3": self.menu_exibir()
+            elif opcao == "4": self.menu_gerenciar()
+            elif opcao == "0": 
+                print("Saindo... 👋")
+                break
+            else:
+                print("Opção inválida.")
 
-    elif opcao == "3":
-        exibir_embarques()
-
-    elif opcao == "4":
-        gerenciar_embarque()
-
-    elif opcao == "0":
-        print("Saindo do sistema... 👋")
-        break
-
-    else:
-        print("Opção inválida. Tente novamente.")
-        print("===============================================================")
-        continue
+# --- Execução ---
+if __name__ == "__main__":
+    app = InterfaceConsole()
+    app.executar()
