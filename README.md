@@ -34,19 +34,18 @@ Para resolver essa situação, criei este sistema que **automatiza todo o proces
 
 3. Execute o programa:
    ```bash
-   python3 main.py
+   python3 novo_registro.py
    ```
-*(troque `main.py` pelo nome do arquivo principal do seu sistema, caso seja diferente)*
 
 ## 📖 Funcionalidades atuais
 - Registro digital de novos embarques  
 - Geração automática de referências  
 - Garantia de **não duplicação** de referências  
-- Armazenamento organizado das informações  
+- Armazenamento organizado das informações
+- Tela para o colaborador inserir a **data de abertura da referência**  
+- Tela para informar a **referência do cliente**   
 
 ## 🛠 Funcionalidades em desenvolvimento
-- Tela para o colaborador inserir a **data de abertura da referência**  
-- Tela para informar a **referência do cliente**  
 - Banco de dados para armazenar referências, permitindo que, ao abrir uma nova referência, sejam exibidas as **últimas 3 referências registradas**  
 
 ## 🗺 Roadmap do projeto
@@ -55,10 +54,10 @@ Para resolver essa situação, criei este sistema que **automatiza todo o proces
 | Registro de novos embarques | ✅ Concluído |
 | Geração automática de referências | ✅ Concluído |
 | Controle de duplicidade | ✅ Concluído |
-| Tela para inserir data de abertura | ⏳ Em desenvolvimento |
-| Tela para informar referência do cliente | ⏳ Em desenvolvimento |
+| Tela para inserir data de abertura | ✅ Concluído  |
+| Tela para informar referência do cliente | ✅ Concluído  |
 | Banco de dados para histórico de referências | ⏳ Em desenvolvimento |
-| Consulta e reajuste de referência | ⏳ Em desenvolvimento |
+| Consulta e reajuste de referência | ✅ Concluído  |
 
 ## 🤖 Observação
 A Inteligência Artificial foi utilizada **apenas para revisar explicações e textos**, evitando gerar ou alterar o código.  
